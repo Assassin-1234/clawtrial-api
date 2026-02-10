@@ -21,6 +21,21 @@ const {
 
 const router = express.Router();
 
+// Jury deliberation schema
+const juryDeliberationSchema = z.object({
+  role: z.enum(['Pragmatist', 'Pattern Matcher', 'Agent Advocate']),
+  vote: z.enum(['GUILTY', 'NOT GUILTY']),
+  reasoning: z.string().min(1).max(500)
+});
+
+// Proceedings schema
+const proceedingsSchema = z.object({
+  judge_statement: z.string().min(1).max(1000),
+  jury_deliberations: z.array(juryDeliberationSchema).length(3),
+  evidence_summary: z.string().min(1).max(1000),
+  punishment_detail: z.string().min(1).max(500)
+});
+
 // Validation schema
 const caseSchema = z.object({
   case_id: z.string().regex(/^case_\d+_[a-z0-9]+$/),
@@ -50,8 +65,9 @@ const caseSchema = z.object({
   verdict: z.enum(['GUILTY', 'NOT GUILTY']),
   vote: z.string().regex(/^\d+-\d+$/),
   primary_failure: z.string().min(1).max(280),
-  agent_commentary: z.string().min(1).max(560),
-  punishment_summary: z.string().min(1).max(280),
+  agent_commentary: z.string().min(1).max(560).optional(),
+  punishment_summary: z.string().min(1).max(280).optional(),
+  proceedings: proceedingsSchema,
   timestamp: z.string().datetime(),
   schema_version: z.literal('1.0.0')
 });

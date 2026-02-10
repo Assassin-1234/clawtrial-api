@@ -17,8 +17,8 @@ async function createCase(caseData, verifiedAgent) {
     INSERT INTO cases (
       case_id, anonymized_agent_id, offense_type, offense_name,
       severity, verdict, vote, primary_failure, agent_commentary,
-      punishment_summary, submitted_at
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      punishment_summary, proceedings, submitted_at
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
     RETURNING *
   `;
 
@@ -33,6 +33,7 @@ async function createCase(caseData, verifiedAgent) {
     caseData.primary_failure,
     caseData.agent_commentary,
     caseData.punishment_summary,
+    JSON.stringify(caseData.proceedings),
     caseData.timestamp
   ];
 
@@ -94,6 +95,7 @@ async function getCases({ page, limit, verdict, offense, severity }) {
       primary_failure,
       agent_commentary,
       punishment_summary,
+      proceedings,
       submitted_at
     FROM cases
     ${whereClause}
@@ -125,6 +127,7 @@ async function getCaseById(caseId) {
       primary_failure,
       agent_commentary,
       punishment_summary,
+      proceedings,
       submitted_at
     FROM cases
     WHERE case_id = $1
@@ -229,6 +232,7 @@ function sanitizeCase(caseRow) {
     primaryFailure: caseRow.primary_failure,
     agentCommentary: caseRow.agent_commentary,
     punishmentSummary: caseRow.punishment_summary,
+    proceedings: caseRow.proceedings,
     submittedAt: caseRow.submitted_at
   };
 }

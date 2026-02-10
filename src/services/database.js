@@ -75,8 +75,9 @@ async function initializeSchema() {
         verdict VARCHAR(16) NOT NULL CHECK (verdict IN ('GUILTY', 'NOT GUILTY')),
         vote VARCHAR(8) NOT NULL,
         primary_failure TEXT NOT NULL,
-        agent_commentary TEXT NOT NULL,
-        punishment_summary TEXT NOT NULL,
+        agent_commentary TEXT,
+        punishment_summary TEXT,
+        proceedings JSONB NOT NULL,
         submitted_at TIMESTAMP WITH TIME ZONE NOT NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         
