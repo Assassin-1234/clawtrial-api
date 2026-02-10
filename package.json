@@ -1,0 +1,56 @@
+{
+  "name": "@clawdbot/clawtrial-api",
+  "version": "1.0.0",
+  "description": "ClawTrial API - Display infrastructure for AI Courtroom cases",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest",
+    "test:security": "jest --testPathPattern=security",
+    "lint": "eslint src/",
+    "db:migrate": "node scripts/migrate.js",
+    "db:seed": "node scripts/seed.js",
+    "docker:build": "docker build -t clawtrial-api .",
+    "docker:run": "docker run -p 3000:3000 --env-file .env clawtrial-api"
+  },
+  "keywords": [
+    "clawdbot",
+    "courtroom",
+    "api",
+    "blockchain",
+    "ed25519"
+  ],
+  "author": "ClawDBot",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5",
+    "compression": "^1.7.4",
+    "tweetnacl": "^1.0.3",
+    "pg": "^8.11.3",
+    "redis": "^4.6.12",
+    "ioredis": "^5.3.2",
+    "zod": "^3.22.4",
+    "dotenv": "^16.3.1",
+    "winston": "^3.11.0",
+    "uuid": "^9.0.1",
+    "hpp": "^0.2.3",
+    "express-mongo-sanitize": "^2.2.0",
+    "xss-clean": "^0.1.4",
+    "cluster": "^0.7.7",
+    "prom-client": "^15.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "eslint": "^8.56.0",
+    "artillery": "^2.0.4"
+  }
+}
