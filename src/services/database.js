@@ -20,13 +20,13 @@ async function setupDatabase() {
     database: process.env.DB_NAME || 'clawtrial',
     user: process.env.DB_USER || 'clawtrial',
     password: process.env.DB_PASSWORD,
-    
+
     // Connection pool settings for high traffic
     max: parseInt(process.env.DB_POOL_MAX || '50'),        // Max connections
     min: parseInt(process.env.DB_POOL_MIN || '10'),        // Min connections
     idleTimeoutMillis: 30000,                              // Close idle connections after 30s
     connectionTimeoutMillis: 5000,                         // Connection timeout
-    
+
     // SSL for production
     ssl: process.env.DB_SSL === 'true' ? {
       rejectUnauthorized: true,
@@ -59,7 +59,7 @@ async function setupDatabase() {
  */
 async function initializeSchema() {
   const client = await pool.connect();
-  
+
   try {
     await client.query('BEGIN');
 
@@ -69,9 +69,9 @@ async function initializeSchema() {
         id SERIAL PRIMARY KEY,
         case_id VARCHAR(64) UNIQUE NOT NULL,
         anonymized_agent_id VARCHAR(64) NOT NULL,
-        offense_type VARCHAR(32) NOT NULL,
-        offense_name VARCHAR(64) NOT NULL,
-        severity VARCHAR(16) NOT NULL CHECK (severity IN ('minor', 'moderate', 'severe')),
+        offense_type VARCHAR(128) NOT NULL,
+        offense_name VARCHAR(128) NOT NULL,
+        severity VARCHAR(32) NOT NULL,
         verdict VARCHAR(16) NOT NULL CHECK (verdict IN ('GUILTY', 'NOT GUILTY')),
         vote VARCHAR(8) NOT NULL,
         primary_failure TEXT NOT NULL,
@@ -91,17 +91,17 @@ async function initializeSchema() {
       CREATE INDEX IF NOT EXISTS idx_cases_submitted_at 
       ON cases(submitted_at DESC)
     `);
-    
+
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_cases_offense_type 
       ON cases(offense_type)
     `);
-    
+
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_cases_verdict 
       ON cases(verdict)
     `);
-    
+
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_cases_severity 
       ON cases(severity)
@@ -166,22 +166,22 @@ function getPool() {
  */
 async function query(text, params, retries = 3) {
   const pool = getPool();
-  
+
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const start = Date.now();
       const result = await pool.query(text, params);
       const duration = Date.now() - start;
-      
+
       logger.debug({ query: text, duration, rows: result.rowCount });
-      
+
       return result;
     } catch (error) {
       if (attempt === retries) {
         logger.error('Query failed after retries:', { error, query: text });
         throw error;
       }
-      
+
       // Exponential backoff
       await new Promise(r => setTimeout(r, 100 * Math.pow(2, attempt)));
     }

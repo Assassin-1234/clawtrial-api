@@ -11,12 +11,12 @@ const express = require('express');
 const { z } = require('zod');
 const { logger } = require('../utils/logger');
 const { cache } = require('../services/redis');
-const { 
-  createCase, 
-  getCases, 
-  getCaseById, 
+const {
+  createCase,
+  getCases,
+  getCaseById,
   getStatistics,
-  isDuplicate 
+  isDuplicate
 } = require('../services/cases');
 
 const router = express.Router();
@@ -40,27 +40,8 @@ const proceedingsSchema = z.object({
 const caseSchema = z.object({
   case_id: z.string().regex(/^case_\d+_[a-z0-9]+$/),
   anonymized_agent_id: z.string().length(32),
-  offense_type: z.enum([
-    'circular_reference',
-    'validation_vampire', 
-    'overthinker',
-    'goalpost_mover',
-    'avoidance_artist',
-    'promise_breaker',
-    'context_collapser',
-    'emergency_fabricator',
-    'monopolizer',
-    'contrarian',
-    'vague_requester',
-    'scope_creeper',
-    'unreader',
-    'interjector',
-    'ghost',
-    'perfectionist',
-    'jargon_juggler',
-    'deadline_denier'
-  ]),
-  offense_name: z.string().min(1).max(64),
+  offense_type: z.string().min(1).max(128),
+  offense_name: z.string().min(1).max(128),
   severity: z.enum(['minor', 'moderate', 'severe']),
   verdict: z.enum(['GUILTY', 'NOT GUILTY']),
   vote: z.string().regex(/^\d+-\d+$/),
@@ -80,13 +61,13 @@ router.post('/', async (req, res) => {
   try {
     // Validate request body
     const validation = caseSchema.safeParse(req.body);
-    
+
     if (!validation.success) {
-      logger.warn('Invalid case submission', { 
+      logger.warn('Invalid case submission', {
         errors: validation.error.errors,
-        agent: req.verifiedAgent?.keyId 
+        agent: req.verifiedAgent?.keyId
       });
-      
+
       return res.status(400).json({
         error: 'Validation failed',
         details: validation.error.errors
@@ -111,7 +92,7 @@ router.post('/', async (req, res) => {
     await cache.del('cases:list:recent');
     await cache.del('cases:stats');
 
-    logger.info('Case created', { 
+    logger.info('Case created', {
       caseId: caseData.case_id,
       agentId: req.verifiedAgent.agentId,
       verdict: caseData.verdict
@@ -145,7 +126,7 @@ router.get('/', async (req, res) => {
 
     // Build cache key
     const cacheKey = `cases:list:${page}:${limit}:${verdict || 'all'}:${offense || 'all'}:${severity || 'all'}`;
-    
+
     // Try cache
     const cached = await cache.get(cacheKey);
     if (cached) {
